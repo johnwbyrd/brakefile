@@ -23,6 +23,8 @@
 #
 
 import codecs
+import os
+import pprint
 
 import bkl.compilers
 import bkl.expr
@@ -382,6 +384,23 @@ class VS201xToolsetBase(VSToolsetBase):
                 self._add_per_file_options(sfile, n_midl)
                 items.add(n_midl)
 
+        filename = project.projectfile.as_native_path_for_output(target) 
+        dirname = os.path.dirname( filename )
+        targetspath = filename.split('-')[0] + '.Targets'
+        targetsfile = ''
+        if os.path.exists( targetspath ):
+            nothing, targetsfile = os.path.split( targetspath )
+        packagesconfig = dirname + '/packages.config'
+        othertargets = Node("ItemGroup")
+        if os.path.exists( packagesconfig ):
+            root.add(othertargets)
+            packagesnode = Node("None", Include="packages.config")
+            othertargets.add(packagesnode)
+            winsparkletargetsnode = Node("None", Include=targetsfile)
+            othertargets.add(winsparkletargetsnode)
+            subtypedesigner = Node("Subtype", "Designer")
+            winsparkletargetsnode.add(subtypedesigner)
+				
         # Dependencies:
         target_deps = self._get_references(target)
         if target_deps:
@@ -394,9 +413,12 @@ class VS201xToolsetBase(VSToolsetBase):
                 refs.add(depnode)
 
         root.add("Import", Project="$(VCTargetsPath)\\Microsoft.Cpp.targets")
-        root.add("ImportGroup", Label="ExtensionTargets")
+        targetsnode = Node("ImportGroup", Label="ExtensionTargets")
+        root.add(targetsnode)
+        if targetsfile != '':
+            print('adding targetsfile: ' + targetsfile + '\n')
+            targetsnode.add("Import", Project=targetsfile )
 
-        filename = project.projectfile.as_native_path_for_output(target)
         paths_info = self.get_project_paths_info(target, project)
 
         formatter = self.XmlFormatter(target.project.settings, paths_info)
@@ -786,7 +808,7 @@ class VS2017Toolset(VS201xToolsetBase):
 
     version = 15
     proj_versions = [10, 11, 12, 14, 15]
-    platform_toolset = "v141"
+    platform_toolset = "10.0.17134.0"
     tools_version = "15.0"
     Solution = VS2017Solution
     Project = VS2017Project
