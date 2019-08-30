@@ -416,7 +416,7 @@ class VS201xToolsetBase(VSToolsetBase):
         targetsnode = Node("ImportGroup", Label="ExtensionTargets")
         root.add(targetsnode)
         if targetsfile != '':
-            print('adding targetsfile: ' + targetsfile + '\n')
+            # print('adding targetsfile: ' + targetsfile + '\n')
             targetsnode.add("Import", Project=targetsfile )
 
         paths_info = self.get_project_paths_info(target, project)
@@ -812,3 +812,51 @@ class VS2017Toolset(VS201xToolsetBase):
     tools_version = "15.0"
     Solution = VS2017Solution
     Project = VS2017Project
+
+
+class VS2019Solution(VS2010Solution):
+    format_version = "11.00"
+    human_version = "2019"
+
+    def write_header(self, file):
+        super(VS2019Solution, self).write_header(file)
+        # file.write("VisualStudioVersion = 15.0.27130.2003\n")
+        # file.write("MinimumVisualStudioVersion = 10.0.40219.1\n")
+
+
+class VS2019Project(VS2010Project):
+    version = 16
+
+
+class VS2019Toolset(VS201xToolsetBase):
+    """
+    Visual Studio 2019.
+
+
+    Special properties
+    ------------------
+    This toolset supports the same special properties that
+    :ref:`ref_toolset_vs2010`. The only difference is that they are prefixed
+    with ``VS2019.option.`` instead of ``vs2010.option.``, i.e. the nodes are:
+
+      - ``vs2019.option.Globals.*``
+      - ``vs2019.option.Configuration.*``
+      - ``vs2019.option.*`` (this is the unnamed ``PropertyGroup`` with
+        global settings such as ``TargetName``)
+      - ``vs2019.option.ClCompile.*``
+      - ``vs2019.option.ResourceCompile.*``
+      - ``vs2019.option.Link.*``
+      - ``vs2019.option.Lib.*``
+      - ``vs2019.option.Manifest.*``
+
+    """
+
+    name = "vs2019"
+
+    version = 15
+    proj_versions = [10, 11, 12, 14, 15, 16]
+    platform_toolset = "v142"
+    tools_version = "16.0"
+    Solution = VS2019Solution
+    Project = VS2019Project
+
